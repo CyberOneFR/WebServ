@@ -5,31 +5,32 @@
 #include <sstream>
 #include <stack>
 
-enum WebServSyntaxState
-{
-	DEFAULT,
-	WORD,
-	COMMENT,
-	STRING_SIMPLE,
-	STRING_DOUBLE,
-	ESCAPE,
-};
-
 WebServConfig::~WebServConfig()
 {
 }
 
-void	WebServConfig::handle_word(ParsingInfo &info, std::string &word)
+void	WebServConfig::handle_directive(ParsingInfo &info, std::stack<WebServSyntaxState> &state_stack, std::string &word, char c)
 {
-	std::cout << word << std::endl;
-	if (word.compare("server") == 0)
-		_servers.push_back(ServerConfig(info.stream));
-	else if (word.empty())
+	if (c == '{')
 	{
-		throw WebServSyntaxException(info, "Unexpected '{'");
+		if (word.compare("server") == 0)
+			_servers.push_back(ServerConfig(info));
+		else if (word.empty())
+			throw SyntaxException(info, "Unexpected '" + std::string(1, c) + "'");
+		else
+			throw SyntaxException(info, "Unknown directive: " + word);
+	}
+	else if (isspace(c))
+	{
+		if (word.compare("server") == 0)
+			state_stack.push(SERVER);
+		else if (word.empty())
+			throw SyntaxException(info, "Unexpected '" + std::string(1, c) + "'");
+		else
+			throw SyntaxException(info, "Unknown directive: " + word);
 	}
 	else
-		throw WebServSyntaxException(info, "Unknown directive: " + word);
+		throw SyntaxException(info, "Unexpected '" + std::string(1, c) + "'");
 	word.clear();
 }
 
@@ -46,7 +47,6 @@ WebServConfig::WebServConfig(const std::string &path)
 	info.path = path;
 	info.line_number = 1;
 	info.column_number = 0;
-	std::string line;
 	state_stack.push(DEFAULT);
 	while (info.stream.get(c))
 	{
@@ -65,10 +65,8 @@ WebServConfig::WebServConfig(const std::string &path)
 					continue;
 				else if (c == '#')
 					state_stack.push(COMMENT);
-				else if (c == '{')
-					handle_word(info, word);
-				else if (c == '}')
-					throw WebServSyntaxException(info, "Unexpected '}'");
+				else if (c == '{' || c == ';' || c == '}')
+					handle_directive(info, state_stack, word, c);
 				else if (c == '\'')
 					state_stack.push(STRING_SIMPLE);
 				else if (c == '"')
@@ -87,17 +85,15 @@ WebServConfig::WebServConfig(const std::string &path)
 				if (std::isspace(c))
 				{
 					state_stack.pop();
-					handle_word(info, word);
+					handle_directive(info, state_stack, word, c);
 				}
 				else if (c == '#')
 				{
 					state_stack.pop();
 					state_stack.push(COMMENT);
 				}
-				else if (c == '{')
-					handle_word(info, word);
-				else if (c == '}')
-					throw WebServSyntaxException(info, "Unexpected '}'");
+				else if (c == '{' || c == ';' || c == '}')
+					handle_directive(info, state_stack, word, c);
 				else if (c == '\'')
 					state_stack.push(STRING_SIMPLE);
 				else if (c == '"')
@@ -140,6 +136,20 @@ WebServConfig::WebServConfig(const std::string &path)
 				state_stack.pop();
 				break;
 			}
+			case SERVER:
+			{
+				if (isspace(c))
+					continue;
+				else if (c == '{')
+				{
+					_servers.push_back(ServerConfig(info));
+					state_stack.pop();
+				}
+				else if (c == '#')
+					state_stack.push(COMMENT);
+				else
+					throw SyntaxException(info, "Unexpected '" + std::string(1, c) + "' in server block");
+			}
 			default:
 				break;
 		}
@@ -159,22 +169,22 @@ WebServConfig	&WebServConfig::operator=(const WebServConfig &other)
 	return *this;
 }
 
-WebServConfig::WebServSyntaxException::~WebServSyntaxException() throw()
+WebServConfig::SyntaxException::~SyntaxException() throw()
 {
 }
 
-WebServConfig::WebServSyntaxException::WebServSyntaxException(ParsingInfo &info, const std::string &message)
+WebServConfig::SyntaxException::SyntaxException(ParsingInfo &info, const std::string &message)
 {
 	std::stringstream ss;
 	ss << info.path << ":" << info.line_number << ":" << info.column_number << " " << message;
 	_message = ss.str();
 }
 
-WebServConfig::WebServSyntaxException::WebServSyntaxException(const WebServSyntaxException &copy): _message(copy._message)
+WebServConfig::SyntaxException::SyntaxException(const SyntaxException &copy): _message(copy._message)
 {
 }
 
-WebServConfig::WebServSyntaxException	&WebServConfig::WebServSyntaxException::operator=(const WebServSyntaxException &other)
+WebServConfig::SyntaxException	&WebServConfig::SyntaxException::operator=(const SyntaxException &other)
 {
 	if (this != &other)
 	{
@@ -183,7 +193,7 @@ WebServConfig::WebServSyntaxException	&WebServConfig::WebServSyntaxException::op
 	return *this;
 }
 
-const char	*WebServConfig::WebServSyntaxException::what(void) const throw()
+const char	*WebServConfig::SyntaxException::what(void) const throw()
 {
 	return _message.c_str();
 }

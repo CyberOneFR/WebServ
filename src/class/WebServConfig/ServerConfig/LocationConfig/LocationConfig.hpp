@@ -16,7 +16,7 @@ class	LocationConfig
 		std::vector<LocationConfig>	_locations;
 	public:
 		~LocationConfig();
-		LocationConfig(std::ifstream &stream);
+		LocationConfig(ParsingInfo &info, const std::string &path);
 		LocationConfig(const LocationConfig &copy);
 		LocationConfig	&operator=(const LocationConfig &other);
 		bool	match(const std::string &request_path) const;

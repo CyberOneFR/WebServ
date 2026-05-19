@@ -4,9 +4,26 @@
 #include <vector>
 #include <map>
 #include "LocationConfig.hpp"
+#include "WebServConfig.hpp"
 
 class	ServerConfig
 {
+	enum ServerSyntaxState
+	{
+		DEFAULT,
+		COMMENT,
+		STRING_SIMPLE,
+		STRING_DOUBLE,
+		ESCAPE,
+		LISTEN,
+		HOST,
+		SERVER_NAME,
+		ERROR_PAGE,
+		CLIENT_MAX_BODY_SIZE,
+		ROOT,
+		INDEX,
+		LOCATION,
+	};
 	private:
 		int							_port;
 		std::string					_host;
@@ -18,7 +35,7 @@ class	ServerConfig
 		std::vector<LocationConfig>	_locations;
 	public:
 		~ServerConfig();
-		ServerConfig(std::ifstream &stream);
+		ServerConfig(ParsingInfo &info);
 		ServerConfig(const ServerConfig &copy);
 		ServerConfig	&operator=(const ServerConfig &other);
 };
