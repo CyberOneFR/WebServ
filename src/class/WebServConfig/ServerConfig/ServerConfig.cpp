@@ -84,17 +84,15 @@ ServerConfig::ServerConfig(ParsingInfo &info): _port(-1), _host(""), _client_max
 					state_stack.push(INDEX);
 				else if (word.compare("location") == 0)
 					state_stack.push(LOCATION);
-				else if (std::isspace(c))
+				else if (std::isspace(c) || c == '{' || c == ';')
 				{
 					if (!word.empty())
+						throw WebServConfig::SyntaxException(info, "Unknown directive: " + word);
+					else if (std::isspace(c))
 						continue;
 					else
-						throw WebServConfig::SyntaxException(info, "Unknown directive: " + word);
+						throw WebServConfig::SyntaxException(info, "Unexpected '" + std::string(1, c) + "' missing directive");
 				}
-				if (std::iscntrl(c))
-					throw WebServConfig::SyntaxException(info, "Unexpected control character");
-				else if (c == '{' || c == ';')
-					throw WebServConfig::SyntaxException(info, "Unexpected '" + std::string(1, c) + "'");
 				else if (c == '}')
 				{
 					if (this->_port == -1 || this->_root.empty())
@@ -102,6 +100,8 @@ ServerConfig::ServerConfig(ParsingInfo &info): _port(-1), _host(""), _client_max
 					else
 						return;
 				}
+				if (std::iscntrl(c))
+					throw WebServConfig::SyntaxException(info, "Unexpected control character");
 				else if (c == '#')
 					state_stack.push(COMMENT);
 				else if (c == '\'')

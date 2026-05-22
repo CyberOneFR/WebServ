@@ -1,3 +1,5 @@
-serve r #coucou
-{
-dsdgfgsfgs
+serve r	#coucou
+
+}
+
+server_name ok.com lol.com truc.com ;
