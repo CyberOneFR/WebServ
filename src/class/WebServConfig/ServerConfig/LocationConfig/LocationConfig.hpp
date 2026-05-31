@@ -6,6 +6,14 @@
 
 class	LocationConfig
 {
+	enum LocationSyntaxState
+	{
+		DEFAULT,
+		COMMENT,
+		STRING_SIMPLE,
+		STRING_DOUBLE,
+		ESCAPE
+	};
 	private:
 		std::string					_path;
 		std::vector<std::string>	_methods;
@@ -16,8 +24,9 @@ class	LocationConfig
 		std::vector<LocationConfig>	_locations;
 	public:
 		~LocationConfig();
-		LocationConfig(ParsingInfo &info, const std::string &path);
+		LocationConfig(ParsingInfo &info);
 		LocationConfig(const LocationConfig &copy);
 		LocationConfig	&operator=(const LocationConfig &other);
-		bool	match(const std::string &request_path) const;
+
+		static void StateDefault(ParsingInfo &info, std::stack<LocationSyntaxState> &state_stack, std::string &word, char c);
 };
