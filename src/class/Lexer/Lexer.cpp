@@ -18,7 +18,7 @@ Lexer::Lexer(const std::string &filename): _tokens()
 	}
 
 	size_t		line_number = 1;
-	size_t		column_number = 0;
+	size_t		column_number = 1;
 
 	LexerState	state = DEFAULT;
 	Token		token;
@@ -179,7 +179,7 @@ Lexer::Lexer(const std::string &filename): _tokens()
 		if (c == '\n')
 		{
 			line_number++;
-			column_number = 0;
+			column_number = 1;
 		}
 		else if ((static_cast<unsigned char>(c) & 0xC0) != 0x80)
 			column_number++;

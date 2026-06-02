@@ -42,6 +42,31 @@ void	Token::clear()
 	_column_number = 0;
 }
 
+const std::string	Token::getTypeString() const
+{
+	switch (_type)
+	{
+		case NONE:
+			return "NONE";
+		case WORD:
+			return "WORD";
+		case COMMENT:
+			return "COMMENT";
+		case LBRACE:
+			return "LBRACE";
+		case RBRACE:
+			return "RBRACE";
+		case SEMICOLON:
+			return "SEMICOLON";
+		case NEWLINE:
+			return "NEWLINE";
+		case WHITESPACE:
+			return "WHITESPACE";
+		default:
+			return "UNKNOWN";
+	}
+}
+
 Token::Type	Token::getType() const
 {
 	return _type;

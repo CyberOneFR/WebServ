@@ -33,6 +33,8 @@ class	Token
 		Token	&operator+=(const Segment &segment);
 		void	clear();
 
+		const std::string			getTypeString() const;
+
 		Type						getType() const;
 		const std::vector<Segment>	&getSegments() const;
 		size_t						getLineNumber() const;

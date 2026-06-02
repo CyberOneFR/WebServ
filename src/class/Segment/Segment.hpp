@@ -29,6 +29,8 @@ class	Segment
 		Segment	&operator+=(const char c);
 		void	clear();
 	
+		const std::string	getTypeString() const;
+
 		Type				getType() const;
 		const std::string	&getContent() const;
 		size_t				getLineNumber() const;

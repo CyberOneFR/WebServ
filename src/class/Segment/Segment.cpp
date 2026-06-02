@@ -38,6 +38,29 @@ void	Segment::clear()
 	_column_number = 0;
 }
 
+const std::string	Segment::getTypeString() const
+{
+	switch (_type)
+	{
+		case NONE:
+			return "NONE";
+		case DEFAULT:
+			return "DEFAULT";
+		case DEFAULT_ESCAPED:
+			return "DEFAULT_ESCAPED";
+		case SQUOTE:
+			return "SQUOTE";
+		case SQUOTE_ESCAPED:
+			return "SQUOTE_ESCAPED";
+		case DQUOTE:
+			return "DQUOTE";
+		case DQUOTE_ESCAPED:
+			return "DQUOTE_ESCAPED";
+		default:
+			return "UNKNOWN";
+	}
+}
+
 Segment::Type	Segment::getType() const
 {
 	return _type;
