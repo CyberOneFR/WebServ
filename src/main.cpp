@@ -1,5 +1,5 @@
 #include <iostream>
-#include "WebServ.hpp"
+#include "Lexer.hpp"
 
 int	main(int argc, char **argv) {
 	if (argc != 2)
@@ -8,8 +8,7 @@ int	main(int argc, char **argv) {
 		return (1);
 	}
 	try {
-		WebServ	server(argv[1]);
-		std::cout << "WebServ started successfully." << std::endl;
+		// Lexer
 	}
 	catch(std::exception &e) {
 		std::cout << e.what() << std::endl;
