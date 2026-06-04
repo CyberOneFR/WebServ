@@ -13,7 +13,7 @@ class	Segment
 			SQUOTE,
 			SQUOTE_ESCAPED,
 			DQUOTE,
-			DQUOTE_ESCAPED
+			DQUOTE_ESCAPED,
 		};
 	private:
 		Type		_type;

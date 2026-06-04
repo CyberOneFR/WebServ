@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include "Token.hpp"
+#include <iterator>
 
 class	Lexer
 {

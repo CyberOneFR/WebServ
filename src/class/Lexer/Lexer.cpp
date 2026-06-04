@@ -4,6 +4,7 @@
 #include <sstream>
 #include "Token.hpp"
 #include "Segment.hpp"
+#include <iterator>
 
 Lexer::~Lexer()
 {
@@ -34,7 +35,7 @@ Lexer::Lexer(const std::string &filename): _tokens()
 				{
 					flush_segment(token, segment);
 					flush_token(_tokens, token);
-					_tokens.push_back(Token(Token::COMMENT, line_number, column_number));
+					_tokens.push_back(Token(Token::NEWLINE, line_number, column_number));
 					state = COMMENT;
 				}
 				else if (c == '{')

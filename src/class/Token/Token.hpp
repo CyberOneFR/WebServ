@@ -11,7 +11,6 @@ class	Token
 		{
 			NONE,
 			WORD,
-			COMMENT,
 			LBRACE,
 			RBRACE,
 			SEMICOLON,

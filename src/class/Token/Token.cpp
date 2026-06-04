@@ -50,8 +50,6 @@ const std::string	Token::getTypeString() const
 			return "NONE";
 		case WORD:
 			return "WORD";
-		case COMMENT:
-			return "COMMENT";
 		case LBRACE:
 			return "LBRACE";
 		case RBRACE:
