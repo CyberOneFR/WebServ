@@ -15,7 +15,6 @@ class	Token
 			RBRACE,
 			SEMICOLON,
 			NEWLINE,
-			WHITESPACE,
 		};
 	private:
 		Type					_type;

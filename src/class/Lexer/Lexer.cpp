@@ -99,7 +99,7 @@ Lexer::Lexer(const std::string &filename): _tokens()
 						segment.setColumnNumber(column_number);
 						segment.setType(Segment::DEFAULT);
 					}
-					segment.setContent(segment.getContent() + c);
+					segment += c;
 				}
 				else
 				{

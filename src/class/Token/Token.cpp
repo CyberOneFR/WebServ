@@ -58,8 +58,6 @@ const std::string	Token::getTypeString() const
 			return "SEMICOLON";
 		case NEWLINE:
 			return "NEWLINE";
-		case WHITESPACE:
-			return "WHITESPACE";
 		default:
 			return "UNKNOWN";
 	}

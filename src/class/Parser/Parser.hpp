@@ -7,11 +7,6 @@
 class	Parser
 {
 	private:
-		enum	ParserState
-		{
-			DEFAULT,
-			ARGUMENTS,
-		};
 		std::vector<Directive>	_directives;
 	public:
 		~Parser();
