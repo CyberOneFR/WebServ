@@ -38,6 +38,11 @@ const std::vector<Directive>	&Directive::getChildren() const
 	return (_children);
 }
 
+std::vector<Directive>	&Directive::getChildrenRef()
+{
+	return (_children);
+}
+
 void	Directive::addArg(const std::vector<Segment> &arg)
 {
 	_args.push_back(arg);

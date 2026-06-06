@@ -19,6 +19,8 @@ class	Directive
 		const std::vector<std::vector<Segment>>	&getArgs() const;
 		const std::vector<Directive>			&getChildren() const;
 
-		void	addArg(const std::vector<Segment> &arg);
-		void	addChild(const Directive &child);
+		std::vector<Directive>					&getChildrenRef();
+
+		void									addArg(const std::vector<Segment> &arg);
+		void									addChild(const Directive &child);
 };
