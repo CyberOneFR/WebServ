@@ -12,48 +12,87 @@ Parser::Parser(const std::string &filename)
 {
 	Lexer								lexer(filename);
 	std::vector<Token>::const_iterator	it = lexer.getTokens().begin();
+	std::vector<Token>::const_iterator	end = lexer.getTokens().end();
 
-	parseListDirective(it, lexer.getTokens().end(), _directives);
-}
-
-
-
-void	Parser::parseDirective(std::vector<Token>::const_iterator &it, std::vector<Token>::const_iterator end)
-{
-	Directive	directive(it->getSegments());
-
-	while (it != end)
+	parseListDirective(it, end, _directives);
+	if (it != end)
 	{
-		switch (it->getType())
-		{
-			case Token::WORD:
-				break;
-			case Token::SEMICOLON:
-				return;
-				break;
-			case Token::LBRACE:
-				parseListDirective(it, end, directive.getChildrenRef());
-				break;
-			case Token::RBRACE:
-				return;
-			default:
-				return;
-		}
+		//throw unexpected token (expected end of file)
 	}
 }
 
-void	Parser::parseListDirective(std::vector<Token>::const_iterator &it, std::vector<Token>::const_iterator end, std::vector<Directive> &directives)
+bool	expected(std::vector<Token>::const_iterator &it, std::vector<Token>::const_iterator &end, Token::Type expected_type)
+{
+	if (it == end)
+	{
+		//throw unexpected end of file
+	}
+	else if (it->getType() != expected_type)
+		return true;
+	return false;
+}
+
+Directive	Parser::parseDirective(std::vector<Token>::const_iterator &it, std::vector<Token>::const_iterator &end)
+{
+	Directive	directive(it->getSegments());
+	it++;
+
+	while (it != end)
+	{
+		switch (it->getType())
+		{
+			case Token::WORD:
+				directive.addArg(it->getSegments());
+				break;
+			case Token::SEMICOLON:
+				return directive;
+			case Token::NEWLINE:
+			case Token::LBRACE:
+				parseBlock(it, end, directive.getChildrenRef());
+				return directive;
+			default:
+				//throw unexpected token (expected directive argument, block start or directive end)
+				break;
+		}
+		it++;
+	}
+}
+
+void	Parser::parseBlock(std::vector<Token>::const_iterator &it, std::vector<Token>::const_iterator &end, std::vector<Directive> &directives)
+{
+	while (it != end)
+	{
+		if (it->getType() != Token::NEWLINE)
+			break;
+		it++;
+	}
+	if (expected(it, end, Token::LBRACE))
+	{
+		//throw unexpected token (expected block start)
+	}
+	it++;
+	parseListDirective(it, end, directives);
+	if (expected(it, end, Token::RBRACE))
+	{
+		//throw unexpected token (expected block end)
+	}
+	it++;
+}
+
+void	Parser::parseListDirective(std::vector<Token>::const_iterator &it, std::vector<Token>::const_iterator &end, std::vector<Directive> &directives)
 {
 	while (it != end)
 	{
 		switch (it->getType())
 		{
 			case Token::WORD:
-				parseDirective(it, end, directives.emplace_back());
+				directives.push_back(parseDirective(it, end));
+				break;
+			case Token::NEWLINE:
 				break;
 			default:
 				return;
-				break;
 		}
+		it++;
 	}
 }
