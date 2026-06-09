@@ -4,11 +4,11 @@ Directive::~Directive()
 {
 }
 
-Directive::Directive(const std::vector<Segment> &name): _name(name), _args(), _children()
+Directive::Directive(const std::vector<Segment> &name, const std::string &filename, size_t line_number, size_t column_number): _name(name), _args(), _children(), _filename(filename), _line_number(line_number), _column_number(column_number)
 {
 }
 
-Directive::Directive(const Directive &copy): _name(copy._name), _args(copy._args), _children(copy._children)
+Directive::Directive(const Directive &copy): _name(copy._name), _args(copy._args), _children(copy._children), _filename(copy._filename), _line_number(copy._line_number), _column_number(copy._column_number)
 {
 }
 
@@ -19,16 +19,19 @@ Directive	&Directive::operator=(const Directive &other)
 		_name = other._name;
 		_args = other._args;
 		_children = other._children;
+		_filename = other._filename;
+		_line_number = other._line_number;
+		_column_number = other._column_number;
 	}
 	return (*this);
 }
 
-const std::vector<Segment>				&Directive::getName() const
+const std::vector<Segment>	&Directive::getName() const
 {
 	return (_name);
 }
 
-const std::vector<std::vector<Segment>>	&Directive::getArgs() const
+const std::vector<std::vector<Segment> >	&Directive::getArgs() const
 {
 	return (_args);
 }
@@ -41,6 +44,21 @@ const std::vector<Directive>	&Directive::getChildren() const
 std::vector<Directive>	&Directive::getChildrenRef()
 {
 	return (_children);
+}
+
+const std::string	&Directive::getFilename() const
+{
+	return (_filename);
+}
+
+size_t	Directive::getLineNumber() const
+{
+	return (_line_number);
+}
+
+size_t	Directive::getColumnNumber() const
+{
+	return (_column_number);
 }
 
 void	Directive::addArg(const std::vector<Segment> &arg)

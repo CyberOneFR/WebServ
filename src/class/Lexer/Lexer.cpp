@@ -35,32 +35,32 @@ Lexer::Lexer(const std::string &filename): _tokens()
 				{
 					flush_segment(token, segment);
 					flush_token(_tokens, token);
-					_tokens.push_back(Token(Token::NEWLINE, line_number, column_number));
+					_tokens.push_back(Token(Token::NEWLINE, filename, line_number, column_number));
 					state = COMMENT;
 				}
 				else if (c == '{')
 				{
 					flush_segment(token, segment);
 					flush_token(_tokens, token);
-					_tokens.push_back(Token(Token::LBRACE, line_number, column_number));
+					_tokens.push_back(Token(Token::LBRACE, filename, line_number, column_number));
 				}
 				else if (c == '}')
 				{
 					flush_segment(token, segment);
 					flush_token(_tokens, token);
-					_tokens.push_back(Token(Token::RBRACE, line_number, column_number));
+					_tokens.push_back(Token(Token::RBRACE, filename, line_number, column_number));
 				}
 				else if (c == ';')
 				{
 					flush_segment(token, segment);
 					flush_token(_tokens, token);
-					_tokens.push_back(Token(Token::SEMICOLON, line_number, column_number));
+					_tokens.push_back(Token(Token::SEMICOLON, filename, line_number, column_number));
 				}
 				else if (c == '\n')
 				{
 					flush_segment(token, segment);
 					flush_token(_tokens, token);
-					_tokens.push_back(Token(Token::NEWLINE, line_number, column_number));
+					_tokens.push_back(Token(Token::NEWLINE, filename, line_number, column_number));
 				}
 				else if (isspace(static_cast<unsigned char>(c)))
 				{
@@ -72,6 +72,7 @@ Lexer::Lexer(const std::string &filename): _tokens()
 					flush_segment(token, segment);
 					segment.setLineNumber(line_number);
 					segment.setColumnNumber(column_number);
+					segment.setFilename(filename);
 					segment.setType(Segment::DQUOTE);
 					state = DQUOTE;
 				}
@@ -80,6 +81,7 @@ Lexer::Lexer(const std::string &filename): _tokens()
 					flush_segment(token, segment);
 					segment.setLineNumber(line_number);
 					segment.setColumnNumber(column_number);
+					segment.setFilename(filename);
 					segment.setType(Segment::SQUOTE);
 					state = SQUOTE;
 				}
@@ -88,6 +90,7 @@ Lexer::Lexer(const std::string &filename): _tokens()
 					flush_segment(token, segment);
 					segment.setLineNumber(line_number);
 					segment.setColumnNumber(column_number);
+					segment.setFilename(filename);
 					segment.setType(Segment::DEFAULT_ESCAPED);
 					state = DEFAULT_ESCAPE;
 				}
@@ -97,6 +100,7 @@ Lexer::Lexer(const std::string &filename): _tokens()
 					{
 						segment.setLineNumber(line_number);
 						segment.setColumnNumber(column_number);
+						segment.setFilename(filename);
 						segment.setType(Segment::DEFAULT);
 					}
 					segment += c;
@@ -118,6 +122,7 @@ Lexer::Lexer(const std::string &filename): _tokens()
 					segment.setType(Segment::SQUOTE_ESCAPED);
 					segment.setLineNumber(line_number);
 					segment.setColumnNumber(column_number);
+					segment.setFilename(filename);
 					state = SQUOTE_ESCAPE;
 				}
 				else
@@ -137,6 +142,7 @@ Lexer::Lexer(const std::string &filename): _tokens()
 					segment.setType(Segment::DQUOTE_ESCAPED);
 					segment.setLineNumber(line_number);
 					segment.setColumnNumber(column_number);
+					segment.setFilename(filename);
 					state = DQUOTE_ESCAPE;
 				}
 				else
@@ -149,7 +155,8 @@ Lexer::Lexer(const std::string &filename): _tokens()
 				flush_segment(token, segment);
 				segment.setType(Segment::DEFAULT);
 				segment.setLineNumber(line_number);
-				segment.setColumnNumber(column_number);
+				segment.setColumnNumber(column_number + 1);
+				segment.setFilename(filename);
 				state = DEFAULT;
 				break;
 			case SQUOTE_ESCAPE:
@@ -157,7 +164,8 @@ Lexer::Lexer(const std::string &filename): _tokens()
 				flush_segment(token, segment);
 				segment.setType(Segment::SQUOTE);
 				segment.setLineNumber(line_number);
-				segment.setColumnNumber(column_number);
+				segment.setColumnNumber(column_number + 1);
+				segment.setFilename(filename);
 				state = SQUOTE;
 				break;
 			case DQUOTE_ESCAPE:
@@ -165,7 +173,8 @@ Lexer::Lexer(const std::string &filename): _tokens()
 				flush_segment(token, segment);
 				segment.setType(Segment::DQUOTE);
 				segment.setLineNumber(line_number);
-				segment.setColumnNumber(column_number);
+				segment.setColumnNumber(column_number + 1);
+				segment.setFilename(filename);
 				state = DQUOTE;
 				break;
 			case COMMENT:
@@ -195,6 +204,7 @@ Lexer::Lexer(const std::string &filename): _tokens()
 	}
 	flush_segment(token, segment);
 	flush_token(_tokens, token);
+	_tokens.push_back(Token(Token::_EOF, filename, line_number, column_number));
 }
 
 void	Lexer::flush_segment(Token &token, Segment &segment)
@@ -206,6 +216,7 @@ void	Lexer::flush_segment(Token &token, Segment &segment)
 			token.setType(Token::WORD);
 			token.setLineNumber(segment.getLineNumber());
 			token.setColumnNumber(segment.getColumnNumber());
+			token.setFilename(segment.getFilename());
 		}
 		token += segment;
 		segment.clear();
@@ -230,7 +241,7 @@ Lexer::LexerUnexpectedControlCharacter::~LexerUnexpectedControlCharacter() throw
 {
 }
 
-Lexer::LexerUnexpectedControlCharacter::LexerUnexpectedControlCharacter(std::string filename, size_t line_number, size_t column_number): _message()
+Lexer::LexerUnexpectedControlCharacter::LexerUnexpectedControlCharacter(const std::string &filename, size_t line_number, size_t column_number): _message()
 {
 	std::stringstream ss;
 	ss << filename << ":" << line_number << ":" << column_number << " Unexpected control character";
@@ -246,7 +257,7 @@ Lexer::LexerUnexpectedEndOfFile::~LexerUnexpectedEndOfFile() throw()
 {
 }
 
-Lexer::LexerUnexpectedEndOfFile::LexerUnexpectedEndOfFile(const std::string &message, std::string filename, size_t line_number, size_t column_number): _message()
+Lexer::LexerUnexpectedEndOfFile::LexerUnexpectedEndOfFile(const std::string &message, const std::string &filename, size_t line_number, size_t column_number): _message()
 {
 	std::stringstream ss;
 	ss << filename << ":" << line_number << ":" << column_number << " " << message;

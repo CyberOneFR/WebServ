@@ -34,7 +34,7 @@ class	Lexer
 				std::string		_message;
 			public:
 				virtual ~LexerUnexpectedControlCharacter() throw();
-				LexerUnexpectedControlCharacter(std::string filename, size_t line_number, size_t column_number);
+				LexerUnexpectedControlCharacter(const std::string &filename, size_t line_number, size_t column_number);
 				virtual const char	*what() const throw();
 		};
 		class	LexerUnexpectedEndOfFile: public std::exception
@@ -43,7 +43,7 @@ class	Lexer
 				std::string	_message;
 			public:
 				virtual ~LexerUnexpectedEndOfFile() throw();
-				LexerUnexpectedEndOfFile(const std::string &message, std::string filename, size_t line_number, size_t column_number);
+				LexerUnexpectedEndOfFile(const std::string &message, const std::string &filename, size_t line_number, size_t column_number);
 				virtual const char	*what() const throw();
 		};
 };

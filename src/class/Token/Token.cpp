@@ -4,15 +4,15 @@ Token::~Token()
 {
 }
 
-Token::Token(): _type(NONE), _segments(), _line_number(0), _column_number(0)
+Token::Token(): _type(NONE), _segments(), _filename(), _line_number(0), _column_number(0)
 {
 }
 
-Token::Token(Type type, size_t line_number, size_t column_number): _type(type), _segments(), _line_number(line_number), _column_number(column_number)
+Token::Token(Type type, const std::string &filename, size_t line_number, size_t column_number): _type(type), _segments(), _filename(filename), _line_number(line_number), _column_number(column_number)
 {
 }
 
-Token::Token(const Token &copy): _type(copy._type), _segments(copy._segments), _line_number(copy._line_number), _column_number(copy._column_number)
+Token::Token(const Token &copy): _type(copy._type), _segments(copy._segments), _filename(copy._filename), _line_number(copy._line_number), _column_number(copy._column_number)
 {
 }
 
@@ -22,6 +22,7 @@ Token	&Token::operator=(const Token &other)
 	{
 		_type = other._type;
 		_segments = other._segments;
+		_filename = other._filename;
 		_line_number = other._line_number;
 		_column_number = other._column_number;
 	}
@@ -38,6 +39,7 @@ void	Token::clear()
 {
 	_type = NONE;
 	_segments.clear();
+	_filename.clear();
 	_line_number = 0;
 	_column_number = 0;
 }
@@ -58,6 +60,8 @@ const std::string	Token::getTypeString() const
 			return "SEMICOLON";
 		case NEWLINE:
 			return "NEWLINE";
+		case _EOF:
+			return "EOF";
 		default:
 			return "UNKNOWN";
 	}
@@ -73,6 +77,11 @@ const std::vector<Segment>	&Token::getSegments() const
 	return _segments;
 }
 
+const std::string	&Token::getFilename() const
+{
+	return _filename;
+}
+
 size_t	Token::getLineNumber() const
 {
 	return _line_number;
@@ -81,6 +90,11 @@ size_t	Token::getLineNumber() const
 size_t	Token::getColumnNumber() const
 {
 	return _column_number;
+}
+
+void	Token::setFilename(const std::string &filename)
+{
+	_filename = filename;
 }
 
 void	Token::setType(Type type)

@@ -15,16 +15,18 @@ class	Token
 			RBRACE,
 			SEMICOLON,
 			NEWLINE,
+			_EOF,
 		};
 	private:
 		Type					_type;
 		std::vector<Segment>	_segments;
+		std::string				_filename;
 		size_t					_line_number;
 		size_t					_column_number;
 	public:
 		~Token();
 		Token();
-		Token(Type type, size_t line_number, size_t column_number);
+		Token(Type type, const std::string &filename, size_t line_number, size_t column_number);
 		Token(const Token &copy);
 		Token	&operator=(const Token &other);
 
@@ -35,10 +37,12 @@ class	Token
 
 		Type						getType() const;
 		const std::vector<Segment>	&getSegments() const;
+		const std::string			&getFilename() const;
 		size_t						getLineNumber() const;
 		size_t						getColumnNumber() const;
 
 		void	setType(Type type);
+		void	setFilename(const std::string &filename);
 		void	setLineNumber(size_t line_number);
 		void	setColumnNumber(size_t column_number);
 };

@@ -1,6 +1,30 @@
 #include <iostream>
 #include <sstream>
 #include "Lexer.hpp"
+#include "Parser.hpp"
+#include "Debug.hpp"
+
+void	printListDirective(const std::vector<Directive> &directives)
+{
+	std::vector<Directive>::const_iterator	it = directives.begin();
+	std::vector<Directive>::const_iterator	end = directives.end();
+	while (it != end)
+	{
+		const Directive &directive = *it;
+		std::cout << "DIRECTIVE [" << directive.getName()[0].getContent() << "]" << std::endl;
+		for (size_t i = 0; i < directive.getArgs().size(); ++i)
+		{
+			std::cout << "  Arg: ";
+			for (size_t j = 0; j < directive.getArgs()[i].size(); ++j)
+			{
+				std::cout << directive.getArgs()[i][j].getContent() << " ";
+			}
+			std::cout << std::endl;
+		}
+		printListDirective(directive.getChildren());
+		it++;
+	}
+}
 
 int	main(int argc, char **argv) {
 	if (argc != 2)
@@ -10,20 +34,9 @@ int	main(int argc, char **argv) {
 	}
 	try {
 		Lexer	lexer(argv[1]);
-		const std::vector<Token>	&tokens = lexer.getTokens();
-		for (size_t i = 0; i < tokens.size(); ++i)
-		{
-			const Token &token = tokens[i];
-			std::stringstream	ss;
-			ss << argv[1] << ":" << token.getLineNumber() << ":" << token.getColumnNumber() << "	"
-			<< token.getTypeString() << std::endl;
-			for (size_t j = 0; j < token.getSegments().size(); ++j)
-			{
-				const Segment &segment = token.getSegments()[j];
-				ss << "	[" << segment.getTypeString() << " \"" << segment.getContent() << "\"]" << std::endl;
-			}
-			std::cout << ss.str();
-		}
+		Debug::printLexer(std::cout, lexer);
+		Parser	parser(lexer);
+		Debug::printParser(std::cout, parser);
 	}
 	catch(std::exception &e) {
 		std::cout << e.what() << std::endl;

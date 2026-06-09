@@ -4,11 +4,11 @@ Segment::~Segment()
 {
 }
 
-Segment::Segment(): _type(NONE), _content(), _line_number(0), _column_number(0)
+Segment::Segment(): _type(NONE), _content(), _filename(), _line_number(0), _column_number(0)
 {
 }
 
-Segment::Segment(const Segment &copy): _type(copy._type), _content(copy._content), _line_number(copy._line_number), _column_number(copy._column_number)
+Segment::Segment(const Segment &copy): _type(copy._type), _content(copy._content), _filename(copy._filename), _line_number(copy._line_number), _column_number(copy._column_number)
 {
 }
 
@@ -18,6 +18,7 @@ Segment	&Segment::operator=(const Segment &other)
 	{
 		_content = other._content;
 		_type = other._type;
+		_filename = other._filename;
 		_line_number = other._line_number;
 		_column_number = other._column_number;
 	}
@@ -32,8 +33,9 @@ Segment	&Segment::operator+=(const char c)
 
 void	Segment::clear()
 {
-	_content.clear();
 	_type = NONE;
+	_content.clear();
+	_filename.clear();
 	_line_number = 0;
 	_column_number = 0;
 }
@@ -71,6 +73,11 @@ const std::string	&Segment::getContent() const
 	return _content;
 }
 
+const std::string	&Segment::getFilename() const
+{
+	return _filename;
+}
+
 size_t	Segment::getLineNumber() const
 {
 	return _line_number;
@@ -99,4 +106,9 @@ void	Segment::setLineNumber(size_t line_number)
 void	Segment::setColumnNumber(size_t column_number)
 {
 	_column_number = column_number;
+}
+
+void	Segment::setFilename(const std::string &filename)
+{
+	_filename = filename;
 }

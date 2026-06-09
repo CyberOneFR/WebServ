@@ -18,6 +18,7 @@ class	Segment
 	private:
 		Type		_type;
 		std::string	_content;
+		std::string	_filename;
 		size_t		_line_number;
 		size_t		_column_number;
 	public:
@@ -33,11 +34,13 @@ class	Segment
 
 		Type				getType() const;
 		const std::string	&getContent() const;
+		const std::string	&getFilename() const;
 		size_t				getLineNumber() const;
 		size_t				getColumnNumber() const;
 	
 		void	setType(Type type);
 		void	setContent(const std::string &content);
+		void	setFilename(const std::string &filename);
 		void	setLineNumber(size_t line_number);
 		void	setColumnNumber(size_t column_number);
 };

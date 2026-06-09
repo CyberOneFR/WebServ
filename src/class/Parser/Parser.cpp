@@ -3,85 +3,90 @@
 #include "Parser.hpp"
 #include "Lexer.hpp"
 #include <iterator>
+#include <assert.h>
+#include <sstream>
+#include <iostream>
 
 Parser::~Parser()
 {
 }
 
-Parser::Parser(const std::string &filename)
+/*
+parser := list_directive EOF
+*/
+Parser::Parser(const Lexer &lexer): _directives()
 {
-	Lexer								lexer(filename);
 	std::vector<Token>::const_iterator	it = lexer.getTokens().begin();
 	std::vector<Token>::const_iterator	end = lexer.getTokens().end();
 
 	parseListDirective(it, end, _directives);
-	if (it != end)
-	{
-		//throw unexpected token (expected end of file)
-	}
+	if (it->getType() != Token::_EOF)
+		throw ParserUnexpectedToken("end of file", it->getFilename(), it->getLineNumber(), it->getColumnNumber());
 }
 
-bool	expected(std::vector<Token>::const_iterator &it, std::vector<Token>::const_iterator &end, Token::Type expected_type)
-{
-	if (it == end)
-	{
-		//throw unexpected end of file
-	}
-	else if (it->getType() != expected_type)
-		return true;
-	return false;
-}
-
+/*
+directive := WORD WORD* (SEMICOLON | block)
+*/
 Directive	Parser::parseDirective(std::vector<Token>::const_iterator &it, std::vector<Token>::const_iterator &end)
 {
-	Directive	directive(it->getSegments());
+	Directive	directive(it->getSegments(), it->getFilename(), it->getLineNumber(), it->getColumnNumber());
 	it++;
 
-	while (it != end)
+	while (it->getType() != Token::_EOF)
 	{
 		switch (it->getType())
 		{
 			case Token::WORD:
 				directive.addArg(it->getSegments());
+				it++;
 				break;
 			case Token::SEMICOLON:
+				it++;
 				return directive;
 			case Token::NEWLINE:
 			case Token::LBRACE:
 				parseBlock(it, end, directive.getChildrenRef());
 				return directive;
 			default:
-				//throw unexpected token (expected directive argument, block start or directive end)
-				break;
+				throw ParserUnexpectedToken("directive argument, block start or directive end", it->getFilename(), it->getLineNumber(), it->getColumnNumber());
 		}
-		it++;
 	}
+	throw ParserUnexpectedEndOfFile("directive argument, block start or directive end", it->getFilename(), it->getLineNumber(), it->getColumnNumber());
 }
 
+/*
+block := NEWLINE* LBRACE list_directive RBRACE
+*/
 void	Parser::parseBlock(std::vector<Token>::const_iterator &it, std::vector<Token>::const_iterator &end, std::vector<Directive> &directives)
 {
-	while (it != end)
+	while (it->getType() != Token::_EOF)
 	{
-		if (it->getType() != Token::NEWLINE)
+		if (it->getType() == Token::NEWLINE)
+			it++;
+		else
 			break;
+	}
+	if (it->getType() == Token::LBRACE)
 		it++;
-	}
-	if (expected(it, end, Token::LBRACE))
-	{
-		//throw unexpected token (expected block start)
-	}
-	it++;
+	else if (it->getType() == Token::_EOF)
+		throw ParserUnexpectedEndOfFile("block start", it->getFilename(), it->getLineNumber(), it->getColumnNumber());
+	else
+		throw ParserUnexpectedToken("block start", it->getFilename(), it->getLineNumber(), it->getColumnNumber());
 	parseListDirective(it, end, directives);
-	if (expected(it, end, Token::RBRACE))
-	{
-		//throw unexpected token (expected block end)
-	}
-	it++;
+	if (it->getType() == Token::RBRACE)
+		it++;
+	else if (it->getType() == Token::_EOF)
+		throw ParserUnexpectedEndOfFile("}", it->getFilename(), it->getLineNumber(), it->getColumnNumber());
+	else
+		throw ParserUnexpectedToken("}", it->getFilename(), it->getLineNumber(), it->getColumnNumber());
 }
 
+/*
+list_directive := directive*
+*/
 void	Parser::parseListDirective(std::vector<Token>::const_iterator &it, std::vector<Token>::const_iterator &end, std::vector<Directive> &directives)
 {
-	while (it != end)
+	while (it->getType() != Token::_EOF)
 	{
 		switch (it->getType())
 		{
@@ -89,10 +94,47 @@ void	Parser::parseListDirective(std::vector<Token>::const_iterator &it, std::vec
 				directives.push_back(parseDirective(it, end));
 				break;
 			case Token::NEWLINE:
+				it++;
 				break;
 			default:
 				return;
 		}
-		it++;
 	}
+}
+
+const std::vector<Directive>	&Parser::getDirectives() const
+{
+	return _directives;
+}
+
+Parser::ParserUnexpectedToken::~ParserUnexpectedToken() throw()
+{
+}
+
+Parser::ParserUnexpectedToken::ParserUnexpectedToken(const std::string &expected, const std::string &filename, size_t line_number, size_t column_number): _message()
+{
+	std::stringstream	ss;
+	ss << filename << ":" << line_number << ":" << column_number << " Unexpected token (expected: " << expected << ")";
+	_message = ss.str();
+}
+
+Parser::ParserUnexpectedEndOfFile::~ParserUnexpectedEndOfFile() throw()
+{
+}
+
+Parser::ParserUnexpectedEndOfFile::ParserUnexpectedEndOfFile(const std::string &expected, const std::string &filename, size_t line_number, size_t column_number): _message()
+{
+	std::stringstream	ss;
+	ss << filename << ":" << line_number << ":" << column_number << " Unexpected end of file (expected: " << expected << ")";
+	_message = ss.str();
+}
+
+const char	*Parser::ParserUnexpectedToken::what() const throw()
+{
+	return _message.c_str();
+}
+
+const char	*Parser::ParserUnexpectedEndOfFile::what() const throw()
+{
+	return _message.c_str();
 }
