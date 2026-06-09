@@ -1,6 +1,5 @@
 #pragma once
 
-#include "WebServConfig.hpp"
 #include "Directive.hpp"
 #include "Token.hpp"
 #include "Lexer.hpp"
